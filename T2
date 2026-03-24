@@ -1,0 +1,157 @@
+"""
+T2 - SISTEMAS DE ECUACIONES LINEALES (orden >= 3x3)
+3 ejercicios solucion unica
+3 ejercicios infinitas soluciones
+3 ejercicios inconsistente
+Verificacion con numpy / sympy
+"""
+
+import numpy as np
+import sympy as sp
+
+print("=" * 65)
+print("  T2 - SISTEMAS DE ECUACIONES LINEALES")
+print("=" * 65)
+
+def clasificar_sistema(A, b):
+    Ab = np.column_stack([A, b])
+    r_A  = np.linalg.matrix_rank(A)
+    r_Ab = np.linalg.matrix_rank(Ab)
+    n = A.shape[1]
+    if r_A != r_Ab:
+        return "Inconsistente (sin solucion)"
+    elif r_A == n:
+        return "Solucion unica"
+    else:
+        return f"Infinitas soluciones (grados de libertad: {n - r_A})"
+
+def resolver_unica(A, b, nombre=""):
+    print(f"\n  {nombre}")
+    print(f"  A =\n{A}")
+    print(f"  b = {b}")
+    tipo = clasificar_sistema(A, b)
+    print(f"  Clasificacion: {tipo}")
+    x = np.linalg.solve(A.astype(float), b.astype(float))
+    print(f"  Solucion x = {np.round(x, 6)}")
+    print(f"  Verificacion A@x = {np.round(A @ x, 6)}  (debe ser b = {b})")
+    print(f"  Correcto: {np.allclose(A @ x, b)}")
+
+def resolver_infinitas(A, b, nombre=""):
+    print(f"\n  {nombre}")
+    print(f"  A =\n{A}")
+    print(f"  b = {b}")
+    tipo = clasificar_sistema(A, b)
+    print(f"  Clasificacion: {tipo}")
+    # Usar sympy para expresar la solucion general
+    A_s = sp.Matrix(A.tolist())
+    b_s = sp.Matrix(b.tolist())
+    Ab_s = A_s.row_join(b_s)
+    sol = Ab_s.rref()
+    print(f"  Forma escalonada reducida (RREF):\n{sol[0]}")
+    print(f"  Columnas pivote: {sol[1]}")
+
+def resolver_inconsistente(A, b, nombre=""):
+    print(f"\n  {nombre}")
+    print(f"  A =\n{A}")
+    print(f"  b = {b}")
+    tipo = clasificar_sistema(A, b)
+    print(f"  Clasificacion: {tipo}")
+    A_s = sp.Matrix(A.tolist())
+    b_s = sp.Matrix(b.tolist())
+    Ab_s = A_s.row_join(b_s)
+    rref, pivotes = Ab_s.rref()
+    print(f"  RREF de [A|b]:\n{rref}")
+    print(f"  rank(A)={np.linalg.matrix_rank(A)}, "
+          f"rank([A|b])={np.linalg.matrix_rank(np.column_stack([A,b]))}")
+    print(f"  => El sistema NO tiene solucion.")
+
+# ─────────────────────────────────────────────────────────
+# SOLUCION UNICA
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  CASO 1 - SOLUCION UNICA")
+print("─" * 65)
+
+# Ej 1: 3x3
+A1 = np.array([[2, 1, -1],
+               [-3, -1, 2],
+               [-2, 1, 2]])
+b1 = np.array([8, -11, -3])
+resolver_unica(A1, b1, "Ejercicio 1 (3x3)")
+
+# Ej 2: 4x4
+A2 = np.array([[1, 2, -1, 1],
+               [2, -1,  3, 2],
+               [3,  1,  0, 1],
+               [1,  0,  2, -1]])
+b2 = np.array([3, 7, 5, 1])
+resolver_unica(A2, b2, "Ejercicio 2 (4x4)")
+
+# Ej 3: 3x3
+A3 = np.array([[3, -2, 1],
+               [1,  3, -2],
+               [2,  1,  3]])
+b3 = np.array([7, -5, 10])
+resolver_unica(A3, b3, "Ejercicio 3 (3x3)")
+
+# ─────────────────────────────────────────────────────────
+# INFINITAS SOLUCIONES
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  CASO 2 - INFINITAS SOLUCIONES")
+print("─" * 65)
+
+# Ej 1: 3x3, rango 2 -> 1 grado de libertad
+A4 = np.array([[1,  2,  3],
+               [2,  4,  6],
+               [3,  6,  9]])
+b4 = np.array([6, 12, 18])
+resolver_infinitas(A4, b4, "Ejercicio 1 (3x3 - rango 1)")
+
+# Ej 2: 4x4, rango 3
+A5 = np.array([[1,  1, -1,  2],
+               [2,  3, -1,  5],
+               [3,  4, -2,  7],
+               [1,  2,  0,  3]])
+b5 = np.array([1, 3, 4, 2])
+resolver_infinitas(A5, b5, "Ejercicio 2 (4x4 - rango 3)")
+
+# Ej 3: 3x3, rango 2
+A6 = np.array([[1, -1, 2],
+               [2, -2, 4],
+               [3, -3, 6]])
+b6 = np.array([3, 6, 9])
+resolver_infinitas(A6, b6, "Ejercicio 3 (3x3 - rango 1)")
+
+# ─────────────────────────────────────────────────────────
+# INCONSISTENTE
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  CASO 3 - INCONSISTENTE (SIN SOLUCION)")
+print("─" * 65)
+
+# Ej 1: 3x3
+A7 = np.array([[1,  2,  3],
+               [4,  5,  6],
+               [7,  8,  9]])
+b7 = np.array([1, 2, 4])   # La ultima ec contradice la combinacion
+resolver_inconsistente(A7, b7, "Ejercicio 1 (3x3)")
+
+# Ej 2: 4x4
+A8 = np.array([[1, 1, 1, 1],
+               [2, 2, 2, 2],
+               [3, 3, 3, 3],
+               [1, 0, 1, 0]])
+b8 = np.array([4, 8, 12, 3])  # 4 no igual que 3 al reducir
+resolver_inconsistente(A8, b8, "Ejercicio 2 (4x4)")
+
+# Ej 3: 3x3
+A9 = np.array([[1, -2,  3],
+               [2, -4,  6],
+               [0,  1, -1]])
+b9 = np.array([5, 11, 2])  # 2*fila1 != fila2 del b
+resolver_inconsistente(A9, b9, "Ejercicio 3 (3x3)")
+
+print("\n" + "=" * 65)
+print("  FIN T2")
+print("=" * 65)
