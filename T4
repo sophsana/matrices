@@ -1,0 +1,129 @@
+"""
+T4 - DETERMINANTES (orden >= 3x3)
+3 ejercicios usando cada metodo:
+  - Eliminacion de Gauss
+  - Diagonalizacion (valores propios)
+  - Expansion por Cofactores
+Verificacion con numpy
+"""
+
+import numpy as np
+
+print("=" * 65)
+print("  T4 - DETERMINANTES")
+print("=" * 65)
+
+# Matrices de prueba
+MATRICES = [
+    np.array([[2,  1, -1],
+              [-3, -1,  2],
+              [-2,  1,  2]], dtype=float),
+
+    np.array([[1,  2,  3,  4],
+              [5,  6,  7,  8],
+              [9, 10, 11, 12],
+              [2, -1,  3, -2]], dtype=float),
+
+    np.array([[3, -2,  0,  1],
+              [1,  4, -3,  2],
+              [0,  2,  1, -1],
+              [5, -1,  2,  3]], dtype=float)
+]
+
+# ─────────────────────────────────────────────────────────
+# METODO 1: Eliminacion de Gauss
+# ─────────────────────────────────────────────────────────
+def det_gauss(M):
+    """
+    Calcula det(M) mediante eliminacion gaussiana con pivoteo parcial.
+    - Cada intercambio de filas multiplica el det por -1.
+    - det = producto de los pivotes * signo.
+    """
+    n = M.shape[0]
+    A = M.copy().astype(float)
+    signo = 1.0
+
+    for col in range(n):
+        # Pivoteo parcial
+        max_row = np.argmax(np.abs(A[col:, col])) + col
+        if max_row != col:
+            A[[col, max_row]] = A[[max_row, col]]
+            signo *= -1
+
+        if abs(A[col, col]) < 1e-12:
+            return 0.0  # Fila de ceros => det = 0
+
+        for row in range(col + 1, n):
+            factor = A[row, col] / A[col, col]
+            A[row, col:] -= factor * A[col, col:]
+
+    # det = signo * producto de la diagonal (triangular superior)
+    det = signo * np.prod(np.diag(A))
+    return det
+
+# ─────────────────────────────────────────────────────────
+# METODO 2: Diagonalizacion (valores propios)
+# ─────────────────────────────────────────────────────────
+def det_diagonalizacion(M):
+    """
+    det(M) = producto de todos los valores propios (con repeticion).
+    Para matrices reales pueden aparecer valores complejos conjugados;
+    su producto es siempre real.
+    """
+    eigenvalues = np.linalg.eigvals(M)
+    det = np.prod(eigenvalues).real
+    return det
+
+# ─────────────────────────────────────────────────────────
+# METODO 3: Expansion por Cofactores (recursiva)
+# ─────────────────────────────────────────────────────────
+def det_cofactores(M):
+    """
+    Expansion por cofactores a lo largo de la primera fila.
+    Recursivo; caso base: 1x1.
+    """
+    M = np.array(M, dtype=float)
+    n = M.shape[0]
+    if n == 1:
+        return M[0, 0]
+    if n == 2:
+        return M[0, 0]*M[1, 1] - M[0, 1]*M[1, 0]
+
+    det = 0.0
+    for j in range(n):
+        menor = np.delete(np.delete(M, 0, axis=0), j, axis=1)
+        cofactor = ((-1) ** j) * det_cofactores(menor)
+        det += M[0, j] * cofactor
+    return det
+
+# ─────────────────────────────────────────────────────────
+# EJECUCION Y VERIFICACION
+# ─────────────────────────────────────────────────────────
+for idx, M in enumerate(MATRICES, 1):
+    print(f"\n{'='*55}")
+    print(f"  Ejercicio {idx}  ({M.shape[0]}x{M.shape[1]})")
+    print(f"{'='*55}")
+    print(f"  M =\n{M}")
+
+    det_np   = np.linalg.det(M)
+    det_g    = det_gauss(M)
+    det_d    = det_diagonalizacion(M)
+    det_c    = det_cofactores(M)
+
+    print(f"\n  [Numpy]             det(M) = {round(det_np, 8)}")
+    print(f"  [Gauss]             det(M) = {round(det_g,  8)}")
+    print(f"  [Diagonalizacion]   det(M) = {round(det_d,  8)}")
+    print(f"  [Cofactores]        det(M) = {round(det_c,  8)}")
+
+    tol = 1e-5
+    ok_g = abs(det_g - det_np)  < tol
+    ok_d = abs(det_d - det_np)  < tol
+    ok_c = abs(det_c - det_np)  < tol
+    print(f"\n  Verificacion (tolerancia {tol}):")
+    print(f"    Gauss          coincide: {ok_g}")
+    print(f"    Diagonalizacion coincide: {ok_d}")
+    print(f"    Cofactores     coincide: {ok_c}")
+
+print("\n" + "=" * 65)
+print("  FIN T4")
+print("=" * 65)
