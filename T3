@@ -1,0 +1,154 @@
+"""
+T3 - MATRICES ESPECIALES
+3 Ejercicios Matriz Rotacional
+3 Ejercicios Matriz Simetrica
+3 Ejercicios Matriz Antisimetrica
+Verificacion con numpy
+"""
+
+import numpy as np
+
+print("=" * 65)
+print("  T3 - MATRICES ESPECIALES")
+print("=" * 65)
+
+# ─────────────────────────────────────────────────────────
+# MATRIZ ROTACIONAL
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  MATRICES ROTACIONALES")
+print("─" * 65)
+print("  Propiedades: R^T = R^{-1}  =>  R @ R^T = I,  det(R) = +1")
+
+def rotacion_3d_x(theta_deg):
+    t = np.radians(theta_deg)
+    return np.array([[1,      0,           0     ],
+                     [0,  np.cos(t), -np.sin(t)  ],
+                     [0,  np.sin(t),  np.cos(t)  ]])
+
+def rotacion_3d_y(theta_deg):
+    t = np.radians(theta_deg)
+    return np.array([[ np.cos(t), 0, np.sin(t)],
+                     [ 0,         1,  0        ],
+                     [-np.sin(t), 0, np.cos(t) ]])
+
+def rotacion_3d_z(theta_deg):
+    t = np.radians(theta_deg)
+    return np.array([[np.cos(t), -np.sin(t), 0],
+                     [np.sin(t),  np.cos(t), 0],
+                     [0,          0,         1]])
+
+def verificar_rotacion(R, nombre):
+    print(f"\n  {nombre}")
+    print(f"  R =\n{np.round(R, 6)}")
+    I = np.round(R @ R.T, 8)
+    det_R = np.linalg.det(R)
+    es_ortogonal = np.allclose(R @ R.T, np.eye(R.shape[0]))
+    es_det1 = np.isclose(det_R, 1.0)
+    print(f"  R @ R^T =\n{I}")
+    print(f"  det(R) = {round(det_R, 8)}")
+    print(f"  Es ortogonal (R@R^T=I): {es_ortogonal}")
+    print(f"  det(R) = +1           : {es_det1}")
+    print(f"  => Es matriz rotacional: {es_ortogonal and es_det1}")
+
+# Ejercicio 1: Rotacion en X 45 grados
+R1 = rotacion_3d_x(45)
+verificar_rotacion(R1, "Ejercicio 1 - Rotacion alrededor del eje X, theta=45°")
+
+# Ejercicio 2: Rotacion en Y 60 grados
+R2 = rotacion_3d_y(60)
+verificar_rotacion(R2, "Ejercicio 2 - Rotacion alrededor del eje Y, theta=60°")
+
+# Ejercicio 3: Rotacion compuesta Rz(30°) @ Rx(45°)
+R3 = rotacion_3d_z(30) @ rotacion_3d_x(45)
+verificar_rotacion(R3, "Ejercicio 3 - Rotacion compuesta Rz(30°) * Rx(45°)")
+
+# ─────────────────────────────────────────────────────────
+# MATRIZ SIMETRICA
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  MATRICES SIMETRICAS")
+print("─" * 65)
+print("  Propiedad: A^T = A")
+
+def verificar_simetrica(A, nombre):
+    es_sim = np.allclose(A, A.T)
+    print(f"\n  {nombre}")
+    print(f"  A =\n{A}")
+    print(f"  A^T =\n{A.T}")
+    print(f"  A = A^T (es simetrica): {es_sim}")
+    vals = np.linalg.eigvalsh(A)
+    print(f"  Valores propios (reales): {np.round(vals, 6)}")
+
+S1 = np.array([[4, 2, 1],
+               [2, 5, 3],
+               [1, 3, 6]])
+verificar_simetrica(S1, "Ejercicio 1 - Simetrica 3x3")
+
+S2 = np.array([[2, -1,  0,  3],
+               [-1,  5,  2, -1],
+               [ 0,  2,  4,  0],
+               [ 3, -1,  0,  7]])
+verificar_simetrica(S2, "Ejercicio 2 - Simetrica 4x4")
+
+# Construir una simetrica a partir de una matriz aleatoria: S = A + A^T
+np.random.seed(7)
+M = np.array([[3,  1, -2],
+              [5,  4,  0],
+              [1, -3,  6]])
+S3 = M + M.T
+verificar_simetrica(S3, "Ejercicio 3 - Simetrica 3x3 construida como M + M^T")
+
+# ─────────────────────────────────────────────────────────
+# MATRIZ ANTISIMETRICA (ASIMETRICA)
+# ─────────────────────────────────────────────────────────
+print("\n" + "─" * 65)
+print("  MATRICES ANTISIMETRICAS")
+print("─" * 65)
+print("  Propiedad: A^T = -A  =>  diagonal principal = 0")
+
+def verificar_antisimetrica(A, nombre):
+    es_antisim = np.allclose(A.T, -A)
+    diag_cero  = np.allclose(np.diag(A), 0)
+    print(f"\n  {nombre}")
+    print(f"  A =\n{A}")
+    print(f"  A^T =\n{A.T}")
+    print(f"  -A =\n{-A}")
+    print(f"  A^T = -A (es antisimetrica): {es_antisim}")
+    print(f"  Diagonal = 0               : {diag_cero}")
+
+K1 = np.array([[ 0,  3, -2],
+               [-3,  0,  1],
+               [ 2, -1,  0]])
+verificar_antisimetrica(K1, "Ejercicio 1 - Antisimetrica 3x3")
+
+K2 = np.array([[ 0,  1, -4,  2],
+               [-1,  0,  3, -5],
+               [ 4, -3,  0,  6],
+               [-2,  5, -6,  0]])
+verificar_antisimetrica(K2, "Ejercicio 2 - Antisimetrica 4x4")
+
+# Construir antisimetrica: K = M - M^T
+K3_raw = np.array([[0,  5, -1],
+                   [3,  0,  4],
+                   [7, -2,  0]])
+K3 = K3_raw - K3_raw.T
+verificar_antisimetrica(K3, "Ejercicio 3 - Antisimetrica 3x3 construida como M - M^T")
+
+# Propiedad extra: toda matriz se puede descomponer en simetrica + antisimetrica
+print("\n" + "─" * 65)
+print("  EXTRA: Descomposicion A = Simetrica + Antisimetrica")
+print("─" * 65)
+A_general = np.array([[1, 2, 3],
+                      [4, 5, 6],
+                      [7, 8, 9]])
+A_sim   = (A_general + A_general.T) / 2
+A_anti  = (A_general - A_general.T) / 2
+print(f"\n  A =\n{A_general}")
+print(f"  Parte simetrica  = (A + A^T)/2 =\n{A_sim}")
+print(f"  Parte antisimetrica = (A - A^T)/2 =\n{A_anti}")
+print(f"  Suma = A? {np.allclose(A_sim + A_anti, A_general)}")
+
+print("\n" + "=" * 65)
+print("  FIN T3")
+print("=" * 65)
