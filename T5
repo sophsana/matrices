@@ -1,0 +1,231 @@
+"""
+T5 - PROPIEDADES DE LOS DETERMINANTES
+2 ejercicios por cada propiedad, verificados con numpy.
+
+Propiedades cubiertas:
+  P1.  det(A^T) = det(A)
+  P2.  Si A tiene una fila de ceros => det(A) = 0
+  P3.  Si dos filas son iguales     => det(A) = 0
+  P4.  Intercambio de filas cambia el signo del determinante
+  P5.  Multiplicar una fila por k multiplica el det por k
+  P6.  det(k*A) = k^n * det(A)
+  P7.  Sumar un multiplo de una fila a otra no cambia el det
+  P8.  det(A*B) = det(A) * det(B)
+  P9.  det(A^{-1}) = 1 / det(A)
+  P10. Si A es triangular => det(A) = producto de la diagonal
+"""
+
+import numpy as np
+
+def det(M):
+    return np.linalg.det(M)
+
+def separador(titulo):
+    print("\n" + "=" * 65)
+    print(f"  {titulo}")
+    print("=" * 65)
+
+def resultado(desc, val1, val2, tol=1e-8):
+    ok = np.isclose(val1, val2, atol=tol)
+    print(f"  {desc}")
+    print(f"    LHS = {round(val1, 10)}  |  RHS = {round(val2, 10)}")
+    print(f"    Verificado: {ok}")
+
+print("=" * 65)
+print("  T5 - PROPIEDADES DE LOS DETERMINANTES")
+print("=" * 65)
+
+# ─────────────────────────────────────────────────────────
+# P1. det(A^T) = det(A)
+# ─────────────────────────────────────────────────────────
+separador("P1. det(A^T) = det(A)")
+
+A = np.array([[1, 2, 3],
+              [4, 5, 6],
+              [7, 8, 10]], dtype=float)
+resultado("Ej 1: det(A^T) vs det(A)", det(A.T), det(A))
+
+B = np.array([[2, -1, 0, 3],
+              [1,  4, 2,-1],
+              [0,  3,-5, 2],
+              [-2, 1, 4, 0]], dtype=float)
+resultado("Ej 2: det(B^T) vs det(B)", det(B.T), det(B))
+
+# ─────────────────────────────────────────────────────────
+# P2. Fila de ceros => det = 0
+# ─────────────────────────────────────────────────────────
+separador("P2. Si hay una fila de ceros => det(A) = 0")
+
+Z1 = np.array([[1, 2, 3],
+               [0, 0, 0],
+               [4, 5, 6]], dtype=float)
+resultado("Ej 1: fila 2 = 0", det(Z1), 0)
+
+Z2 = np.array([[3, 1, 2, 4],
+               [1, 5, 0, 2],
+               [0, 0, 0, 0],
+               [2, 3, 1, 7]], dtype=float)
+resultado("Ej 2: fila 3 = 0", det(Z2), 0)
+
+# ─────────────────────────────────────────────────────────
+# P3. Filas iguales => det = 0
+# ─────────────────────────────────────────────────────────
+separador("P3. Si dos filas son identicas => det(A) = 0")
+
+F1 = np.array([[1, 2, 3],
+               [1, 2, 3],
+               [4, 5, 6]], dtype=float)
+resultado("Ej 1: filas 1 y 2 iguales", det(F1), 0)
+
+F2 = np.array([[2, -1, 3, 1],
+               [4,  0, 1, 2],
+               [2, -1, 3, 1],
+               [1,  5, 0, 3]], dtype=float)
+resultado("Ej 2: filas 1 y 3 iguales", det(F2), 0)
+
+# ─────────────────────────────────────────────────────────
+# P4. Intercambio de filas => det cambia de signo
+# ─────────────────────────────────────────────────────────
+separador("P4. Intercambiar dos filas multiplica det por -1")
+
+A4 = np.array([[1, 2, 3],
+               [4, 5, 6],
+               [7, 8, 10]], dtype=float)
+A4_swap = A4[[1, 0, 2], :]   # intercambio filas 0 y 1
+resultado("Ej 1: det(A_swap) = -det(A)", det(A4_swap), -det(A4))
+
+B4 = np.array([[3, 1,-2, 4],
+               [0, 2, 5,-1],
+               [1,-3, 0, 2],
+               [4, 0,-1, 3]], dtype=float)
+B4_swap = B4[[0, 2, 1, 3], :]  # intercambio filas 1 y 2
+resultado("Ej 2: det(B_swap) = -det(B)", det(B4_swap), -det(B4))
+
+# ─────────────────────────────────────────────────────────
+# P5. Multiplicar una fila por k => det se multiplica por k
+# ─────────────────────────────────────────────────────────
+separador("P5. Multiplicar fila i por k => det *= k")
+
+k5 = 4
+A5 = np.array([[2, 1,-1],
+               [1, 3, 2],
+               [0,-1, 4]], dtype=float)
+A5_k = A5.copy(); A5_k[0, :] *= k5
+resultado(f"Ej 1: det(A con fila 1 * {k5}) = {k5}*det(A)",
+          det(A5_k), k5 * det(A5))
+
+k5b = 3
+B5 = np.array([[1,0,2,1],
+               [3,1,0,2],
+               [0,2,1,3],
+               [2,1,3,0]], dtype=float)
+B5_k = B5.copy(); B5_k[2, :] *= k5b
+resultado(f"Ej 2: det(B con fila 3 * {k5b}) = {k5b}*det(B)",
+          det(B5_k), k5b * det(B5))
+
+# ─────────────────────────────────────────────────────────
+# P6. det(kA) = k^n * det(A)
+# ─────────────────────────────────────────────────────────
+separador("P6. det(k*A) = k^n * det(A)")
+
+k6 = 2
+A6 = np.array([[1, 2, 3],
+               [4, 5, 6],
+               [7, 8, 10]], dtype=float)
+n6 = A6.shape[0]
+resultado(f"Ej 1: det({k6}*A3x3) = {k6}^3 * det(A)",
+          det(k6 * A6), (k6**n6) * det(A6))
+
+k6b = 3
+B6 = np.array([[2,-1, 0, 1],
+               [1, 3,-2, 0],
+               [0, 1, 4,-1],
+               [2, 0,-1, 3]], dtype=float)
+n6b = B6.shape[0]
+resultado(f"Ej 2: det({k6b}*B4x4) = {k6b}^4 * det(B)",
+          det(k6b * B6), (k6b**n6b) * det(B6))
+
+# ─────────────────────────────────────────────────────────
+# P7. Sumar multiplo de una fila a otra NO cambia el det
+# ─────────────────────────────────────────────────────────
+separador("P7. Ri -> Ri + c*Rj  =>  det(A) no cambia")
+
+A7 = np.array([[3, 1, 2],
+               [1,-2, 4],
+               [2, 3,-1]], dtype=float)
+A7_op = A7.copy(); A7_op[0, :] += 5 * A7_op[1, :]
+resultado("Ej 1: R1 -> R1 + 5*R2", det(A7_op), det(A7))
+
+B7 = np.array([[1, 2,-1, 0],
+               [3, 0, 2, 1],
+               [0,-1, 4, 2],
+               [2, 3, 0,-1]], dtype=float)
+B7_op = B7.copy(); B7_op[3, :] += (-2) * B7_op[0, :]
+resultado("Ej 2: R4 -> R4 + (-2)*R1", det(B7_op), det(B7))
+
+# ─────────────────────────────────────────────────────────
+# P8. det(A*B) = det(A) * det(B)
+# ─────────────────────────────────────────────────────────
+separador("P8. det(A*B) = det(A) * det(B)")
+
+A8 = np.array([[1, 2, 3],
+               [0, 4, 5],
+               [1, 0, 6]], dtype=float)
+B8 = np.array([[7, 0, 1],
+               [2, 3, 0],
+               [1, 1, 4]], dtype=float)
+resultado("Ej 1: det(A@B) vs det(A)*det(B)",
+          det(A8 @ B8), det(A8) * det(B8))
+
+A8b = np.array([[2,-1, 0, 1],
+                [1, 3,-2, 0],
+                [0, 1, 4,-1],
+                [2, 0,-1, 3]], dtype=float)
+B8b = np.array([[1, 0, 2,-1],
+                [3,-2, 0, 1],
+                [0, 1,-3, 2],
+                [-1, 2, 1, 0]], dtype=float)
+resultado("Ej 2: det(A@B) vs det(A)*det(B) [4x4]",
+          det(A8b @ B8b), det(A8b) * det(B8b))
+
+# ─────────────────────────────────────────────────────────
+# P9. det(A^{-1}) = 1 / det(A)
+# ─────────────────────────────────────────────────────────
+separador("P9. det(A^{-1}) = 1 / det(A)")
+
+A9 = np.array([[1, 2, 3],
+               [0, 4, 5],
+               [1, 0, 6]], dtype=float)
+resultado("Ej 1: det(A^-1) vs 1/det(A)",
+          det(np.linalg.inv(A9)), 1 / det(A9))
+
+B9 = np.array([[2,-1, 0, 1],
+               [1, 3,-2, 0],
+               [0, 1, 4,-1],
+               [2, 0,-1, 3]], dtype=float)
+resultado("Ej 2: det(B^-1) vs 1/det(B) [4x4]",
+          det(np.linalg.inv(B9)), 1 / det(B9))
+
+# ─────────────────────────────────────────────────────────
+# P10. Matriz triangular => det = producto de la diagonal
+# ─────────────────────────────────────────────────────────
+separador("P10. Matriz triangular: det = prod(diagonal)")
+
+T1 = np.array([[3, 1, 2],
+               [0, 5, 4],
+               [0, 0, 2]], dtype=float)
+diag_prod1 = T1[0,0] * T1[1,1] * T1[2,2]
+resultado("Ej 1: triangular superior 3x3",
+          det(T1), diag_prod1)
+
+T2 = np.array([[4, 0, 0, 0],
+               [2, 3, 0, 0],
+               [1,-1, 5, 0],
+               [3, 2,-2, 7]], dtype=float)
+diag_prod2 = T2[0,0] * T2[1,1] * T2[2,2] * T2[3,3]
+resultado("Ej 2: triangular inferior 4x4",
+          det(T2), diag_prod2)
+
+print("\n" + "=" * 65)
+print("  FIN T5")
+print("=" * 65)
